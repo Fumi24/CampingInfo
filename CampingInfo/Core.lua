@@ -16,6 +16,34 @@ end
 -- the Camping Benefit block. Weak-keyed so tooltip frames can still be GC'd.
 local appliedTooltips = setmetatable({}, { __mode = "k" })
 
+-- Snapshot of the most recently shown GameTooltip, for `/ci debug`. The live
+-- tooltip disappears as soon as the mouse moves to type a command, so this
+-- caches it instead of requiring the tooltip to still be visible.
+local lastTooltipSnapshot = nil
+
+local function SnapshotTooltip(tooltip)
+    if tooltip ~= GameTooltip then
+        return
+    end
+
+    local unit = GameTooltip.GetUnit and select(2, GameTooltip:GetUnit())
+    local _, itemLink = GameTooltip:GetItem()
+
+    local lines = {}
+    for i = 1, GameTooltip:NumLines() do
+        local left = _G["GameTooltipTextLeft" .. i]
+        local text = left and left:GetText()
+        if text then
+            table.insert(lines, string.format("  line %d: %s", i, text))
+        end
+    end
+
+    lastTooltipSnapshot = string.format(
+        "tooltip=%s unit=%s item=%s\n%s",
+        tostring(tooltip:GetName()), tostring(unit), tostring(itemLink), table.concat(lines, "\n")
+    )
+end
+
 local function GetItemIDFromTooltip(tooltip, tooltipData)
     if tooltipData and tooltipData.id then
         return tooltipData.id
@@ -84,24 +112,91 @@ local function OnTooltipItem(tooltip, tooltipData)
     AddCampingLines(tooltip, itemID)
 end
 
+--[[
+Name-based fallback for placed Camping structures.
+
+A Camping item hovered in bags/bank/vendor fires an item tooltip and is
+matched by item ID above. Once placed at a campsite, the same feature is a
+world object rather than an item link, so no item ID is available — it may
+render as a unit tooltip (a common way custom servers implement clickable
+world props) or something else entirely. Instead of guessing the object
+type, this reads whatever text the tooltip actually rendered and matches
+it against known Camping item names.
+--]]
+
+local function GetTooltipFirstLineText(tooltip)
+    if not tooltip or not tooltip.GetName then
+        return nil
+    end
+
+    local tooltipName = tooltip:GetName()
+    if not tooltipName then
+        return nil
+    end
+
+    local fontString = _G[tooltipName .. "TextLeft1"]
+    if not fontString or not fontString.GetText then
+        return nil
+    end
+
+    return fontString:GetText()
+end
+
+local function OnTooltipNameFallback(tooltip)
+    if not CampingInfoSettings.enabled then
+        return
+    end
+
+    local text = GetTooltipFirstLineText(tooltip)
+    if not text then
+        return
+    end
+
+    -- Substring match rather than exact equality: a placed object's tooltip
+    -- may add coloring, an owner tag, or other text around the item name.
+    local lowerText = text:lower()
+    for id, entry in pairs(ns.CampingItems) do
+        if lowerText:find(entry.name:lower(), 1, true) then
+            AddCampingLines(tooltip, id)
+            return
+        end
+    end
+end
+
 local function RegisterTooltipHook()
     if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
             OnTooltipItem(tooltip, data)
         end)
-        return
-    end
 
-    -- Classic-style fallback for clients without TooltipDataProcessor.
-    GameTooltip:HookScript("OnTooltipSetItem", function(tooltip)
-        OnTooltipItem(tooltip, nil)
-    end)
-
-    if ItemRefTooltip then
-        ItemRefTooltip:HookScript("OnTooltipSetItem", function(tooltip)
+        if Enum.TooltipDataType.Unit then
+            TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tooltip)
+                OnTooltipNameFallback(tooltip)
+            end)
+        end
+    else
+        -- Classic-style fallback for clients without TooltipDataProcessor.
+        GameTooltip:HookScript("OnTooltipSetItem", function(tooltip)
             OnTooltipItem(tooltip, nil)
         end)
+
+        if ItemRefTooltip then
+            ItemRefTooltip:HookScript("OnTooltipSetItem", function(tooltip)
+                OnTooltipItem(tooltip, nil)
+            end)
+        end
+
+        GameTooltip:HookScript("OnTooltipSetUnit", function(tooltip)
+            OnTooltipNameFallback(tooltip)
+        end)
     end
+
+    -- Catch-all: whatever type of tooltip a placed world object turns out
+    -- to use, this still catches it once the tooltip actually renders.
+    GameTooltip:HookScript("OnShow", function(tooltip)
+        SnapshotTooltip(tooltip)
+        OnTooltipNameFallback(tooltip)
+    end)
 end
 
 local function PrintCurrentTooltipItemID()
@@ -119,6 +214,16 @@ local function PrintCurrentTooltipItemID()
     else
         print("|cffffcc00CampingInfo|r: could not parse an item ID from the current tooltip.")
     end
+end
+
+local function DumpCurrentTooltip()
+    if not lastTooltipSnapshot then
+        print("|cffffcc00CampingInfo|r: no tooltip seen yet. Hover the object, then run /ci debug (it uses the last tooltip shown, so it's fine if it's already gone).")
+        return
+    end
+
+    print("|cffffcc00CampingInfo|r: last tooltip seen:")
+    print(lastTooltipSnapshot)
 end
 
 --[[
@@ -328,6 +433,8 @@ local function HandleSlashCommand(msg)
 
     if msg == "id" then
         PrintCurrentTooltipItemID()
+    elseif msg == "debug" then
+        DumpCurrentTooltip()
     elseif msg == "scan" then
         ScanForCampingItems()
     elseif msg == "on" then
@@ -345,6 +452,7 @@ local function HandleSlashCommand(msg)
     else
         print("|cffffcc00CampingInfo|r commands:")
         print("  /ci id - print the item ID of the currently shown tooltip")
+        print("  /ci debug - print every line of the last tooltip shown (for diagnosing placed objects)")
         print("  /ci scan - scan bags/bank/open vendor for known Camping items")
         print("  /ci on | off - toggle the Camping Benefit tooltip section")
         print("  /ci detailed on | off - toggle exclusivity/conflict notes")
