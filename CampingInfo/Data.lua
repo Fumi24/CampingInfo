@@ -17,207 +17,245 @@ table Core.lua looks up at tooltip time:
         verified      = true,
     }
 
-No item IDs have been verified in-game yet, so every known Camping feature
-from the Wowhead Forever Camping guide lives in ns.CampingItemsPending below,
-keyed by a stable slug instead of an item ID. Nothing in CampingItemsPending
-is shown in tooltips.
+Item IDs below were sourced from each item's own Wowhead Forever page
+(wowhead.com/forever/item=<id>/<slug>), linked from the Camping overview
+guide. `verified = true` means both the item ID and the benefit text are
+considered solid; `verified = false` means the ID is sourced but the exact
+live tooltip wording still needs an in-game check (see its `notes`).
 
-To promote an entry once you've captured its real item ID in-game:
-1. Hover the item and run `/ci id` (see Core.lua) to print its item ID.
-2. Copy the matching block out of CampingItemsPending into CampingItems,
-   keyed by that numeric item ID.
-3. Resolve `inheritedFrom` (currently a slug) to the tier-1 item's own
+Any Camping feature not yet linked from the guide lives in
+ns.CampingItemsPending below, keyed by a stable slug instead of an item ID.
+Nothing in CampingItemsPending is shown in tooltips.
+
+To promote a pending entry once you have its real item ID:
+1. Copy the block out of CampingItemsPending into CampingItems, keyed by
+   that numeric item ID.
+2. Resolve `inheritedFrom` (currently a slug) to the tier-1 item's own
    numeric item ID, once that tier-1 item has also been promoted.
-4. Set `verified = true`.
-5. Delete the entry from CampingItemsPending.
+3. Confirm the benefit text in-game and set `verified = true`.
+4. Delete the entry from CampingItemsPending.
 --]]
 
 ns.CampingItems = {
-    -- [itemID] = { ... },
+    -- Alchemy
+    [279956] = { -- Mana Well
+        name = "Mana Well", profession = "Alchemy", tier = 1,
+        buff = "Mana regeneration", exclusiveWith = "Blessing of Wisdom",
+        verified = true,
+    },
+    [279970] = { -- Fermenter
+        name = "Fermenter", profession = "Alchemy", tier = 2,
+        utility = "Create certain reagents", inheritedFrom = 279956,
+        verified = true,
+    },
+    [279990] = { -- Alchemy Laboratory
+        name = "Alchemy Laboratory", profession = "Alchemy", tier = 3,
+        utility = "Enables recipes requiring an Alchemy Lab", inheritedFrom = 279956,
+        verified = true,
+    },
 
+    -- Blacksmithing
+    [279944] = { -- Sharpening Wheel
+        name = "Sharpening Wheel", profession = "Blacksmithing", tier = 1,
+        buff = "Increased Strength", exclusiveWith = "Strength of Earth Totem",
+        verified = true,
+    },
+    [279988] = { -- Anvil
+        name = "Anvil", profession = "Blacksmithing", tier = 2,
+        utility = "Usable anvil", inheritedFrom = 279944,
+        verified = true,
+    },
+    [279955] = { -- Master Forge
+        name = "Master Forge", profession = "Blacksmithing", tier = 3,
+        utility = "Enables recipes requiring a Forge", inheritedFrom = 279944,
+        verified = true,
+    },
+
+    -- Enchanting
+    [279976] = { -- Enchanted Lute
+        name = "Enchanted Lute", profession = "Enchanting", tier = 1,
+        buff = "Increased Armor, All Stats, and Resistances", exclusiveWith = "Mark of the Wild",
+        notes = "Exact live wording unverified; source text is ambiguous.",
+        verified = false,
+    },
+    [279985] = { -- Arcane Salvager
+        name = "Arcane Salvager", profession = "Enchanting", tier = 2,
+        utility = "More efficient disenchanting", inheritedFrom = 279976,
+        verified = true,
+    },
+    [279987] = { -- Arcane Forge
+        name = "Arcane Forge", profession = "Enchanting", tier = 3,
+        utility = "Enables recipes requiring an Arcane Forge", inheritedFrom = 279976,
+        verified = true,
+    },
+
+    -- Engineering (utility only, no camp buff)
+    [279950] = { -- Reagent Bot
+        name = "Reagent Bot", profession = "Engineering", tier = 1,
+        utility = "Purchase reagents",
+        verified = true,
+    },
+    [279949] = { -- Repair Bot
+        name = "Repair Bot", profession = "Engineering", tier = 2,
+        utility = "Purchase reagents and repair gear",
+        verified = true,
+    },
+    [279989] = { -- Anarchist's Workbench
+        name = "Anarchist's Workbench", profession = "Engineering", tier = 3,
+        utility = "Enables recipes requiring the workbench",
+        verified = true,
+    },
+
+    -- Herbalism
+    [279962] = { -- Incense Candle
+        name = "Incense Candle", profession = "Herbalism", tier = 1,
+        buff = "Increased Intellect", exclusiveWith = "Arcane Intellect",
+        verified = true,
+    },
+    [279964] = { -- Greenhouse
+        name = "Greenhouse", profession = "Herbalism", tier = 2,
+        utility = "Grow herbs from planted seeds", inheritedFrom = 279962,
+        verified = true,
+    },
+    [279947] = { -- Seed Hybridizer
+        name = "Seed Hybridizer", profession = "Herbalism", tier = 3,
+        utility = "Multiply/combine seeds", inheritedFrom = 279962,
+        verified = true,
+    },
+
+    -- Leatherworking
     [279978] = { -- Camp Tent
         name = "Camp Tent", profession = "Leatherworking", tier = 1,
         buff = "Rested XP up to 5% of a level",
-        -- itemID sourced from Wowhead (wowhead.com/forever/item=279978/camp-tent);
         -- buff text confirmed against an in-game tooltip screenshot.
+        verified = true,
+    },
+    [279941] = { -- Tanning Rack
+        name = "Tanning Rack", profession = "Leatherworking", tier = 2,
+        utility = "Create certain reagents", inheritedFrom = 279978,
+        verified = true,
+    },
+    [279945] = { -- Sewing Machine
+        name = "Sewing Machine", profession = "Leatherworking", tier = 3,
+        utility = "Enables recipes requiring it", inheritedFrom = 279978,
+        verified = true,
+    },
+
+    -- Mining
+    [279960] = { -- Lodestone
+        name = "Lodestone", profession = "Mining", tier = 1,
+        buff = "Increased melee Attack Power", exclusiveWith = "Blessing of Might",
+        verified = true,
+    },
+    [279948] = { -- Rock Garden
+        name = "Rock Garden", profession = "Mining", tier = 2,
+        utility = "Spawns a common mining node over time", inheritedFrom = 279960,
+        verified = true,
+    },
+    [279952] = { -- Molten Foundry
+        name = "Molten Foundry", profession = "Mining", tier = 3,
+        utility = "Enables recipes requiring it", inheritedFrom = 279960,
+        verified = true,
+    },
+
+    -- Skinning
+    [279979] = { -- Camp Chair
+        name = "Camp Chair", profession = "Skinning", tier = 1,
+        buff = "+2% Critical Strike", exclusiveWith = "Moonkin Aura",
+        verified = true,
+    },
+    [279969] = { -- Field Guide
+        name = "Field Guide", profession = "Skinning", tier = 2,
+        utility = "Grants Track Beasts", inheritedFrom = 279979,
+        verified = true,
+    },
+    [279938] = { -- Trapper's Workbench
+        name = "Trapper's Workbench", profession = "Skinning", tier = 3,
+        utility = "Contains 1 trap", inheritedFrom = 279979,
+        verified = true,
+    },
+
+    -- Tailoring
+    [279972] = { -- Faction Banner
+        name = "Faction Banner", profession = "Tailoring", tier = 1,
+        buff = "Increased Spirit", exclusiveWith = "Divine Spirit",
+        verified = true,
+    },
+    [279943] = { -- Spinning Wheel
+        name = "Spinning Wheel", profession = "Tailoring", tier = 2,
+        utility = "Create certain reagents", inheritedFrom = 279972,
+        verified = true,
+    },
+    [279959] = { -- Loom
+        name = "Loom", profession = "Tailoring", tier = 3,
+        utility = "Enables recipes requiring it", inheritedFrom = 279972,
+        verified = true,
+    },
+
+    -- Cooking (utility only, no camp buff)
+    [279981] = { -- Basic Campfire Kit
+        name = "Basic Campfire Kit", profession = "Cooking", tier = 1,
+        utility = "Cooking + up to 3 additional camp features",
+        verified = true,
+    },
+    [279961] = { -- Journeyman Campfire Kit
+        name = "Journeyman Campfire Kit", profession = "Cooking", tier = 2,
+        utility = "Cooking + up to 5 additional camp features",
+        verified = true,
+    },
+    [279957] = { -- Cookie's Feast
+        name = "Cookie's Feast", profession = "Cooking", tier = 2,
+        buff = "Stamina-boosting food",
+        verified = true,
+    },
+    [279974] = { -- Expert Campfire Kit
+        name = "Expert Campfire Kit", profession = "Cooking", tier = 3,
+        utility = "Cooking + up to 10 additional camp features",
+        verified = true,
+    },
+    -- Iron Oven (Tier 4) not yet linked from the guide; still in CampingItemsPending.
+
+    -- First Aid
+    [279968] = { -- First Aid Kit
+        name = "First Aid Kit", profession = "First Aid", tier = 1,
+        buff = "Stamina buff",
+        verified = true,
+    },
+    [279940] = { -- Toxin Study
+        name = "Toxin Study", profession = "First Aid", tier = 2,
+        utility = "Healing potions and antivenom",
+        notes = "Exact effect TBD; verify against live client.",
+        verified = false,
+    },
+    [279951] = { -- Plague Doctor's Laboratory
+        name = "Plague Doctor's Laboratory", profession = "First Aid", tier = 3,
+        utility = "Healing potions and poultices",
+        notes = "Exact effect TBD; verify against live client.",
+        verified = false,
+    },
+
+    -- Fishing
+    [279967] = { -- Fish Bowl
+        name = "Fish Bowl", profession = "Fishing", tier = 1,
+        buff = "+8% increased stats", exclusiveWith = "Blessing of Kings",
+        verified = true,
+    },
+    [279965] = { -- Fishing Rack
+        name = "Fishing Rack", profession = "Fishing", tier = 2,
+        utility = "Catch uncommon fish for 1 hour + fishing-skill lures", inheritedFrom = 279967,
+        verified = true,
+    },
+    [279966] = { -- Fishing Hut
+        name = "Fishing Hut", profession = "Fishing", tier = 3,
+        utility = "Catch rare fish for 1 hour + fishing-skill lures", inheritedFrom = 279967,
         verified = true,
     },
 }
 
 ns.CampingItemsPending = {
-    -- Alchemy
-    mana_well = {
-        name = "Mana Well", profession = "Alchemy", tier = 1,
-        buff = "Mana regeneration", exclusiveWith = "Blessing of Wisdom",
-    },
-    fermenter = {
-        name = "Fermenter", profession = "Alchemy", tier = 2,
-        utility = "Create certain reagents", inheritedFrom = "mana_well",
-    },
-    alchemy_laboratory = {
-        name = "Alchemy Laboratory", profession = "Alchemy", tier = 3,
-        utility = "Enables recipes requiring an Alchemy Lab", inheritedFrom = "mana_well",
-    },
-
-    -- Blacksmithing
-    sharpening_wheel = {
-        name = "Sharpening Wheel", profession = "Blacksmithing", tier = 1,
-        buff = "Increased Strength", exclusiveWith = "Strength of Earth Totem",
-    },
-    anvil = {
-        name = "Anvil", profession = "Blacksmithing", tier = 2,
-        utility = "Usable anvil", inheritedFrom = "sharpening_wheel",
-    },
-    master_forge = {
-        name = "Master Forge", profession = "Blacksmithing", tier = 3,
-        utility = "Enables recipes requiring a Forge", inheritedFrom = "sharpening_wheel",
-    },
-
-    -- Enchanting
-    enchanted_lute = {
-        name = "Enchanted Lute", profession = "Enchanting", tier = 1,
-        buff = "Increased Armor, All Stats, and Resistances", exclusiveWith = "Mark of the Wild",
-        notes = "Exact live wording unverified; source text is ambiguous.",
-    },
-    arcane_salvager = {
-        name = "Arcane Salvager", profession = "Enchanting", tier = 2,
-        utility = "More efficient disenchanting", inheritedFrom = "enchanted_lute",
-    },
-    arcane_forge = {
-        name = "Arcane Forge", profession = "Enchanting", tier = 3,
-        utility = "Enables recipes requiring an Arcane Forge", inheritedFrom = "enchanted_lute",
-    },
-
-    -- Engineering (utility only, no camp buff)
-    reagent_bot = {
-        name = "Reagent Bot", profession = "Engineering", tier = 1,
-        utility = "Purchase reagents",
-    },
-    repair_bot = {
-        name = "Repair Bot", profession = "Engineering", tier = 2,
-        utility = "Purchase reagents and repair gear",
-    },
-    anarchists_workbench = {
-        name = "Anarchist's Workbench", profession = "Engineering", tier = 3,
-        utility = "Enables recipes requiring the workbench",
-    },
-
-    -- Herbalism
-    incense_candle = {
-        name = "Incense Candle", profession = "Herbalism", tier = 1,
-        buff = "Increased Intellect", exclusiveWith = "Arcane Intellect",
-    },
-    greenhouse = {
-        name = "Greenhouse", profession = "Herbalism", tier = 2,
-        utility = "Grow herbs from planted seeds", inheritedFrom = "incense_candle",
-    },
-    seed_hybridizer = {
-        name = "Seed Hybridizer", profession = "Herbalism", tier = 3,
-        utility = "Multiply/combine seeds", inheritedFrom = "incense_candle",
-    },
-
-    -- Leatherworking
-    -- camp_tent (Tier 1) is verified; see ns.CampingItems[279978] above.
-    tanning_rack = {
-        name = "Tanning Rack", profession = "Leatherworking", tier = 2,
-        utility = "Create certain reagents", inheritedFrom = 279978,
-    },
-    sewing_machine = {
-        name = "Sewing Machine", profession = "Leatherworking", tier = 3,
-        utility = "Enables recipes requiring it", inheritedFrom = 279978,
-    },
-
-    -- Mining
-    lodestone = {
-        name = "Lodestone", profession = "Mining", tier = 1,
-        buff = "Increased melee Attack Power", exclusiveWith = "Blessing of Might",
-    },
-    rock_garden = {
-        name = "Rock Garden", profession = "Mining", tier = 2,
-        utility = "Spawns a common mining node over time", inheritedFrom = "lodestone",
-    },
-    molten_foundry = {
-        name = "Molten Foundry", profession = "Mining", tier = 3,
-        utility = "Enables recipes requiring it", inheritedFrom = "lodestone",
-    },
-
-    -- Skinning
-    camp_chair = {
-        name = "Camp Chair", profession = "Skinning", tier = 1,
-        buff = "+2% Critical Strike", exclusiveWith = "Moonkin Aura",
-    },
-    field_guide = {
-        name = "Field Guide", profession = "Skinning", tier = 2,
-        utility = "Grants Track Beasts", inheritedFrom = "camp_chair",
-    },
-    trappers_workbench = {
-        name = "Trapper's Workbench", profession = "Skinning", tier = 3,
-        utility = "Contains 1 trap", inheritedFrom = "camp_chair",
-    },
-
-    -- Tailoring
-    faction_banner = {
-        name = "Faction Banner", profession = "Tailoring", tier = 1,
-        buff = "Increased Spirit", exclusiveWith = "Divine Spirit",
-    },
-    spinning_wheel = {
-        name = "Spinning Wheel", profession = "Tailoring", tier = 2,
-        utility = "Create certain reagents", inheritedFrom = "faction_banner",
-    },
-    loom = {
-        name = "Loom", profession = "Tailoring", tier = 3,
-        utility = "Enables recipes requiring it", inheritedFrom = "faction_banner",
-    },
-
-    -- Cooking (utility only, no camp buff)
-    basic_campfire = {
-        name = "Basic Campfire", profession = "Cooking", tier = 1,
-        utility = "Cooking + up to 3 additional camp features",
-    },
-    journeyman_campfire = {
-        name = "Journeyman Campfire", profession = "Cooking", tier = 2,
-        utility = "Cooking + up to 5 additional camp features",
-    },
-    cookies_feast = {
-        name = "Cookie's Feast", profession = "Cooking", tier = 2,
-        buff = "Stamina-boosting food",
-    },
-    expert_campfire = {
-        name = "Expert Campfire", profession = "Cooking", tier = 3,
-        utility = "Cooking + up to 10 additional camp features",
-    },
+    -- Cooking
     iron_oven = {
         name = "Iron Oven", profession = "Cooking", tier = 4,
         utility = "Required for advanced cooking recipes",
-    },
-
-    -- First Aid
-    first_aid_kit = {
-        name = "First Aid Kit", profession = "First Aid", tier = 1,
-        buff = "Stamina buff",
-    },
-    toxin_study = {
-        name = "Toxin Study", profession = "First Aid", tier = 2,
-        utility = "Healing potions and antivenom",
-        notes = "Exact effect TBD; verify against live client.",
-    },
-    plague_doctors_laboratory = {
-        name = "Plague Doctor's Laboratory", profession = "First Aid", tier = 3,
-        utility = "Healing potions and poultices",
-        notes = "Exact effect TBD; verify against live client.",
-    },
-
-    -- Fishing
-    fish_bowl = {
-        name = "Fish Bowl", profession = "Fishing", tier = 1,
-        buff = "+8% increased stats", exclusiveWith = "Blessing of Kings",
-    },
-    fishing_rack = {
-        name = "Fishing Rack", profession = "Fishing", tier = 2,
-        utility = "Catch uncommon fish for 1 hour + fishing-skill lures", inheritedFrom = "fish_bowl",
-    },
-    fishing_hut = {
-        name = "Fishing Hut", profession = "Fishing", tier = 3,
-        utility = "Catch rare fish for 1 hour + fishing-skill lures", inheritedFrom = "fish_bowl",
     },
 }

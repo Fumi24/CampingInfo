@@ -4,7 +4,7 @@ A small World of Warcraft: Forever addon that adds a clear **Camping Benefit** s
 
 ## Status
 
-Milestone 1 skeleton implemented. The tooltip hook, data model, and debug workflow are functional, but **no item IDs or the client Interface version have been verified in-game yet** — see [Data accuracy](#data-accuracy) below. See [`PLAN.md`](PLAN.md) for the full build specification.
+Milestone 2 in progress. 36 of 37 known Camping items have a confirmed item ID and appear in tooltips; only `Iron Oven` (Cooking Tier 4) and the client's `## Interface:` version are still pending — see [Data accuracy](#data-accuracy) below. See [`PLAN.md`](PLAN.md) for the full build specification.
 
 ## Install
 
@@ -24,7 +24,7 @@ Higher tiers can show both inherited buffs and their additional utility.
 
 ## Supported Camping features
 
-All Camping feature items documented in the [Wowhead Forever Camping guide](https://www.wowhead.com/forever/guide/camping-overview-unlock-rewards) are present in `CampingInfo/Data.lua` (Alchemy, Blacksmithing, Enchanting, Engineering, Herbalism, Leatherworking, Mining, Skinning, Tailoring, Cooking, First Aid, Fishing — tiers 1 through 3/4). Tooltips only appear for entries that have been moved into the verified `ns.CampingItems` table; everything else currently sits in `ns.CampingItemsPending` awaiting a real item ID (see below).
+All Camping feature items documented in the [Wowhead Forever Camping guide](https://www.wowhead.com/forever/guide/camping-overview-unlock-rewards) are present in `CampingInfo/Data.lua` (Alchemy, Blacksmithing, Enchanting, Engineering, Herbalism, Leatherworking, Mining, Skinning, Tailoring, Cooking, First Aid, Fishing — tiers 1 through 3/4). Tooltips appear for the 36 entries in `ns.CampingItems` keyed by their real item ID; `Iron Oven` (Cooking Tier 4) is the one item not yet linked from the guide and sits in `ns.CampingItemsPending` awaiting an ID (see below).
 
 ## `/ci` commands
 
@@ -40,11 +40,13 @@ All Camping feature items documented in the [Wowhead Forever Camping guide](http
 
 `CampingInfo/Data.lua` intentionally does **not** invent WoW: Forever item IDs, and `CampingInfo.toc`'s `## Interface:` line is a placeholder (`TODO_VERIFY_CURRENT_FOREVER_INTERFACE`) pending a real Interface number from a known-working addon or client metadata.
 
-There are three ways to fill in a pending item's real ID — use whichever is easiest per item, no need to hover all ~38 one at a time:
+36 of 37 item IDs came from each item's own Wowhead Forever page (`wowhead.com/forever/item=<id>/<slug>`), linked from the Camping overview guide. `verified = true` on an entry means both the ID and the benefit text are considered solid; `verified = false` (currently `Enchanted Lute`, `Toxin Study`, `Plague Doctor's Laboratory`) means the ID is sourced but the exact live tooltip wording still needs an in-game check — see each entry's `notes`.
 
-- **Wowhead**: find the item's page (e.g. `wowhead.com/forever/item=<id>/<slug>`) and hand over the numeric ID directly.
-- **`/ci scan`**: with matching items in your bags, an open bank, or an open vendor window, run `/ci scan` to bulk-resolve every match at once and get a paste-ready `Data.lua` block in a copyable window.
-- **`/ci id`**: hover a single item's tooltip in-game and run `/ci id` to print just that item's ID.
+To fill in a still-pending item's real ID (currently just `Iron Oven`), any of these work:
+
+- **Wowhead**: find the item's page and hand over the numeric ID directly.
+- **`/ci scan`**: with the item in your bags, an open bank, or an open vendor window, run `/ci scan` to bulk-resolve every match at once and get a paste-ready `Data.lua` block in a copyable window.
+- **`/ci id`**: hover the item's tooltip in-game and run `/ci id` to print just that item's ID.
 
 Whichever source is used:
 
@@ -52,8 +54,6 @@ Whichever source is used:
 2. Confirm the buff/utility text and profession/tier against the live tooltip where possible.
 3. Resolve any `inheritedFrom` slug to the tier-1 item's own item ID once that item is also verified.
 4. Set `verified = true`.
-
-`Camp Tent` (item ID `279978`) is already verified this way — see `ns.CampingItems` in `Data.lua`.
 
 ## Project layout
 
