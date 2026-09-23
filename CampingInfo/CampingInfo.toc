@@ -1,8 +1,8 @@
 ## Title: CampingInfo
 ## Notes: Shows normalized Camping benefits on Camping item tooltips.
 ## Author: Fumi24
-## Version: 0.1.0
-## Interface: TODO_VERIFY_CURRENT_FOREVER_INTERFACE
+## Version: 0.2.0
+## Interface: 16001
 ## SavedVariables: CampingInfoSettings
 
 Data.lua
