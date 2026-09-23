@@ -223,8 +223,9 @@ local function RegisterTooltipHook()
         PollTooltipForNameFallback(tooltip)
     end)
 
-    GameTooltip:HookScript("OnHide", function()
+    GameTooltip:HookScript("OnHide", function(tooltip)
         lastPolledText = nil
+        appliedTooltips[tooltip] = nil
     end)
 end
 
