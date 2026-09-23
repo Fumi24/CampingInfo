@@ -29,8 +29,10 @@ All Camping feature items documented in the [Wowhead Forever Camping guide](http
 ## `/ci` commands
 
 ```text
-/ci id            - print the item ID of the currently shown tooltip
-/ci on | off       - toggle the Camping Benefit tooltip section
+/ci id              - print the item ID of the currently shown tooltip
+/ci scan            - scan bags/bank/open vendor for known Camping items
+                       and print a paste-ready Data.lua block for each match
+/ci on | off        - toggle the Camping Benefit tooltip section
 /ci detailed on|off - toggle exclusivity/conflict notes (e.g. "Does not stack with Moonkin Aura")
 ```
 
@@ -38,13 +40,20 @@ All Camping feature items documented in the [Wowhead Forever Camping guide](http
 
 `CampingInfo/Data.lua` intentionally does **not** invent WoW: Forever item IDs, and `CampingInfo.toc`'s `## Interface:` line is a placeholder (`TODO_VERIFY_CURRENT_FOREVER_INTERFACE`) pending a real Interface number from a known-working addon or client metadata.
 
-To verify an item:
+There are three ways to fill in a pending item's real ID — use whichever is easiest per item, no need to hover all ~38 one at a time:
 
-1. Hover it in-game and run `/ci id` to get its numeric item ID.
-2. Move its block from `ns.CampingItemsPending` to `ns.CampingItems` in `Data.lua`, keyed by that item ID.
-3. Confirm the buff/utility text and profession/tier against the live tooltip.
-4. Resolve any `inheritedFrom` slug to the tier-1 item's own item ID once that item is also verified.
-5. Set `verified = true`.
+- **Wowhead**: find the item's page (e.g. `wowhead.com/forever/item=<id>/<slug>`) and hand over the numeric ID directly.
+- **`/ci scan`**: with matching items in your bags, an open bank, or an open vendor window, run `/ci scan` to bulk-resolve every match at once and get a paste-ready `Data.lua` block in a copyable window.
+- **`/ci id`**: hover a single item's tooltip in-game and run `/ci id` to print just that item's ID.
+
+Whichever source is used:
+
+1. Move the item's block from `ns.CampingItemsPending` to `ns.CampingItems` in `Data.lua`, keyed by its numeric item ID.
+2. Confirm the buff/utility text and profession/tier against the live tooltip where possible.
+3. Resolve any `inheritedFrom` slug to the tier-1 item's own item ID once that item is also verified.
+4. Set `verified = true`.
+
+`Camp Tent` (item ID `279978`) is already verified this way — see `ns.CampingItems` in `Data.lua`.
 
 ## Project layout
 

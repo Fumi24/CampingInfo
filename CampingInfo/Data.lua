@@ -34,6 +34,14 @@ To promote an entry once you've captured its real item ID in-game:
 
 ns.CampingItems = {
     -- [itemID] = { ... },
+
+    [279978] = { -- Camp Tent
+        name = "Camp Tent", profession = "Leatherworking", tier = 1,
+        buff = "Rested XP up to 5% of a level",
+        -- itemID sourced from Wowhead (wowhead.com/forever/item=279978/camp-tent);
+        -- buff text confirmed against an in-game tooltip screenshot.
+        verified = true,
+    },
 }
 
 ns.CampingItemsPending = {
@@ -109,18 +117,14 @@ ns.CampingItemsPending = {
     },
 
     -- Leatherworking
-    camp_tent = {
-        name = "Camp Tent", profession = "Leatherworking", tier = 1,
-        buff = "Rested XP up to 5% of a level",
-        notes = "Tooltip text confirmed via screenshot; item ID still unverified.",
-    },
+    -- camp_tent (Tier 1) is verified; see ns.CampingItems[279978] above.
     tanning_rack = {
         name = "Tanning Rack", profession = "Leatherworking", tier = 2,
-        utility = "Create certain reagents", inheritedFrom = "camp_tent",
+        utility = "Create certain reagents", inheritedFrom = 279978,
     },
     sewing_machine = {
         name = "Sewing Machine", profession = "Leatherworking", tier = 3,
-        utility = "Enables recipes requiring it", inheritedFrom = "camp_tent",
+        utility = "Enables recipes requiring it", inheritedFrom = 279978,
     },
 
     -- Mining
