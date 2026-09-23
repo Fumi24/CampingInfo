@@ -1,0 +1,6 @@
+package-as: CampingInfo
+
+ignore:
+    - Untitled.png
+
+license-output: LICENSE.txt
