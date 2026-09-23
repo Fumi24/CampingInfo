@@ -163,6 +163,23 @@ local function OnTooltipNameFallback(tooltip)
     end
 end
 
+-- Tracks the tooltip text last processed by the OnUpdate poll below, so a
+-- plain-text world-object tooltip (no item/unit event fires at all for
+-- these) still gets matched every time its content changes in place —
+-- not just when GameTooltip transitions from hidden to shown.
+local lastPolledText = nil
+
+local function PollTooltipForNameFallback(tooltip)
+    local text = GetTooltipFirstLineText(tooltip)
+    if not text or text == lastPolledText then
+        return
+    end
+
+    lastPolledText = text
+    SnapshotTooltip(tooltip)
+    OnTooltipNameFallback(tooltip)
+end
+
 local function RegisterTooltipHook()
     if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
         TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
@@ -196,6 +213,18 @@ local function RegisterTooltipHook()
     GameTooltip:HookScript("OnShow", function(tooltip)
         SnapshotTooltip(tooltip)
         OnTooltipNameFallback(tooltip)
+    end)
+
+    -- Plain-text world-object tooltips fire neither OnTooltipSetItem nor
+    -- OnTooltipSetUnit, and moving the mouse directly from one such object
+    -- to another updates the text in place without an OnShow transition.
+    -- Polling on OnUpdate is what actually catches those reliably.
+    GameTooltip:HookScript("OnUpdate", function(tooltip)
+        PollTooltipForNameFallback(tooltip)
+    end)
+
+    GameTooltip:HookScript("OnHide", function()
+        lastPolledText = nil
     end)
 end
 
