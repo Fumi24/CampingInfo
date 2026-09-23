@@ -29,11 +29,6 @@ All 37 Camping feature items documented in the [Wowhead Forever Camping guide](h
 ## `/ci` commands
 
 ```text
-/ci id              - print the item ID of the currently shown tooltip
-/ci debug           - print every line of the last tooltip shown, for
-                       diagnosing a placed object that isn't matching
-/ci scan            - scan bags/bank/open vendor for known Camping items
-                       and print a paste-ready Data.lua block for each match
 /ci on | off        - toggle the Camping Benefit tooltip section
 /ci detailed on|off - toggle exclusivity/conflict notes (e.g. "Does not stack with Moonkin Aura")
 ```
@@ -45,7 +40,7 @@ Camping items aren't just hovered in bags — after being used, they're placed a
 - The item-ID path (bags, bank, vendor, chat links) is unchanged and reliable.
 - For anything else, `Core.lua` hooks `OnTooltipSetUnit` (placed objects are commonly implemented as units on custom servers) and a catch-all `OnShow` on `GameTooltip`, then reads whatever text line 1 of the tooltip actually rendered and matches it against known Camping item names (substring match, so an owner tag or extra text around the name is fine).
 
-This is a best-effort fallback written without being able to test in-game what tooltip event a placed Camping object actually fires. If a placed item still doesn't show the Camping Benefit section, hover it once and run `/ci debug` — it prints the tooltip frame name, whether it resolved as a unit/item, and every rendered line, using a snapshot from the last tooltip shown (so it still works even after the tooltip's gone by the time you finish typing).
+Dedup is checked against the tooltip's own current lines rather than cached state, since the game rebuilds a placed object's tooltip content on each fresh hover — including a repeat hover of the same object — without a reliable Hide/Show transition to key off of.
 
 ## Data accuracy
 
@@ -53,13 +48,7 @@ This is a best-effort fallback written without being able to test in-game what t
 
 All 37 item IDs came from each item's own Wowhead Forever page (`wowhead.com/forever/item=<id>/<slug>`), linked from the Camping overview guide. `verified = true` on an entry means both the ID and the benefit text are considered solid; `verified = false` (currently `Enchanted Lute`, `Toxin Study`, `Plague Doctor's Laboratory`) means the ID is sourced but the exact live tooltip wording still needs an in-game check — see each entry's `notes`.
 
-If a future guide update adds a new Camping feature, add it to `ns.CampingItemsPending` in `Data.lua` (keyed by a slug, not an item ID) until its real item ID is known. To resolve one:
-
-- **Wowhead**: find the item's page and hand over the numeric ID directly.
-- **`/ci scan`**: with the item in your bags, an open bank, or an open vendor window, run `/ci scan` to bulk-resolve every match at once and get a paste-ready `Data.lua` block in a copyable window.
-- **`/ci id`**: hover the item's tooltip in-game and run `/ci id` to print just that item's ID.
-
-Whichever source is used:
+If a future guide update adds a new Camping feature, add it to `ns.CampingItemsPending` in `Data.lua` (keyed by a slug, not an item ID) until its real item ID is known — the item's own Wowhead Forever page is the fastest way to get that ID. Then:
 
 1. Move the item's block from `ns.CampingItemsPending` to `ns.CampingItems` in `Data.lua`, keyed by its numeric item ID.
 2. Confirm the buff/utility text and profession/tier against the live tooltip where possible.
