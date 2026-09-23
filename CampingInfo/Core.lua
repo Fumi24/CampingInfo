@@ -11,11 +11,6 @@ local function InitSettings()
     end
 end
 
--- Tracks the last itemID rendered per tooltip so repeated post-call
--- invocations for the same item (e.g. tooltip refreshes) don't duplicate
--- the Camping Benefit block. Weak-keyed so tooltip frames can still be GC'd.
-local appliedTooltips = setmetatable({}, { __mode = "k" })
-
 -- Snapshot of the most recently shown GameTooltip, for `/ci debug`. The live
 -- tooltip disappears as soon as the mouse moves to type a command, so this
 -- caches it instead of requiring the tooltip to still be visible.
@@ -66,13 +61,36 @@ local function GetItemIDFromTooltip(tooltip, tooltipData)
     return tonumber(idString)
 end
 
+-- Checks the tooltip's actual current lines for our marker, rather than
+-- trusting a cached "already added" flag. The game appears to rebuild the
+-- tooltip's content on each fresh hover of a placed object — including a
+-- repeat hover of the very same object — without a Hide/Show transition we
+-- can reliably observe, which silently wiped our lines while cached dedup
+-- state still believed they were present. Reading the tooltip itself can't
+-- go stale that way.
+local function TooltipHasCampingBenefit(tooltip)
+    local tooltipName = tooltip:GetName()
+    if not tooltipName then
+        return false
+    end
+
+    for i = 1, tooltip:NumLines() do
+        local fontString = _G[tooltipName .. "TextLeft" .. i]
+        if fontString and fontString:GetText() == "Camping Benefit" then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function AddCampingLines(tooltip, itemID)
     local entry = ns.CampingItems[itemID]
     if not entry then
         return
     end
 
-    if appliedTooltips[tooltip] == itemID then
+    if TooltipHasCampingBenefit(tooltip) then
         return
     end
 
@@ -96,7 +114,6 @@ local function AddCampingLines(tooltip, itemID)
     end
 
     tooltip:Show()
-    appliedTooltips[tooltip] = itemID
 end
 
 local function OnTooltipItem(tooltip, tooltipData)
@@ -163,15 +180,20 @@ local function OnTooltipNameFallback(tooltip)
     end
 end
 
--- Tracks the tooltip text last processed by the OnUpdate poll below, so a
--- plain-text world-object tooltip (no item/unit event fires at all for
--- these) still gets matched every time its content changes in place —
--- not just when GameTooltip transitions from hidden to shown.
+-- Tracks the tooltip text last processed by the OnUpdate poll below, purely
+-- as a fast-path skip so the name-matching loop doesn't run every single
+-- frame. It is NOT relied on for correctness — the tooltip can be silently
+-- rebuilt (wiping our lines) while the name text stays the same, so this
+-- also re-checks TooltipHasCampingBenefit even when the text is unchanged.
 local lastPolledText = nil
 
 local function PollTooltipForNameFallback(tooltip)
     local text = GetTooltipFirstLineText(tooltip)
-    if not text or text == lastPolledText then
+    if not text then
+        return
+    end
+
+    if text == lastPolledText and TooltipHasCampingBenefit(tooltip) then
         return
     end
 
@@ -223,9 +245,8 @@ local function RegisterTooltipHook()
         PollTooltipForNameFallback(tooltip)
     end)
 
-    GameTooltip:HookScript("OnHide", function(tooltip)
+    GameTooltip:HookScript("OnHide", function()
         lastPolledText = nil
-        appliedTooltips[tooltip] = nil
     end)
 end
 
