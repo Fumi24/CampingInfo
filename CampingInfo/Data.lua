@@ -15,6 +15,9 @@ table Core.lua looks up at tooltip time:
         exclusiveWith = "Moonkin Aura",
         inheritedFrom = nil,      -- itemID of the tier-1 item, once known
         verified      = true,
+        aliases       = nil,      -- optional list of alternate names shown by
+                                   -- the placed world object's tooltip, when
+                                   -- it differs from `name`
     }
 
 Item IDs below were sourced from each item's own Wowhead Forever page
@@ -162,6 +165,8 @@ ns.CampingItems = {
     [279979] = { -- Camp Chair
         name = "Camp Chair", profession = "Skinning", tier = 1,
         buff = "+2% Critical Strike", exclusiveWith = "Moonkin Aura",
+        -- The placed world object's tooltip shows "Chair", not the item name.
+        aliases = { "Chair" },
         verified = true,
     },
     [279969] = { -- Field Guide

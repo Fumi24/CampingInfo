@@ -149,6 +149,15 @@ local function OnTooltipNameFallback(tooltip)
             AddCampingLines(tooltip, id)
             return
         end
+
+        if entry.aliases then
+            for _, alias in ipairs(entry.aliases) do
+                if lowerText:find(alias:lower(), 1, true) then
+                    AddCampingLines(tooltip, id)
+                    return
+                end
+            end
+        end
     end
 end
 
