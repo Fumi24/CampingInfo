@@ -4,7 +4,7 @@ A small World of Warcraft: Forever addon that adds a clear **Camping Benefit** s
 
 ## Status
 
-Milestone 2 complete: all 37 known Camping items have a confirmed item ID, and `## Interface: 16001` is set. Camping features are placed as physical objects at a campsite rather than just hovered as bag items, so item-ID matching alone isn't enough — see [How placed objects are matched](#how-placed-objects-are-matched) below for the current approach and its status. See [`PLAN.md`](PLAN.md) for the full build specification.
+Milestone 2 complete: all 37 known Camping items have a confirmed item ID, and `## Interface: 16001` is set. Camping features are placed as physical objects at a campsite rather than just hovered as bag items, so item-ID matching alone isn't enough — see [How placed objects are matched](#how-placed-objects-are-matched) below for the current approach and its status.
 
 ## Install
 
@@ -73,7 +73,6 @@ CampingInfo/
   CampingInfo.toc
   Data.lua
   Core.lua
-PLAN.md
 README.md
 ```
 
