@@ -257,5 +257,10 @@ ns.CampingItemsPending = {
     iron_oven = {
         name = "Iron Oven", profession = "Cooking", tier = 4,
         utility = "Required for advanced cooking recipes",
+        -- Guide links this to a spell (wowhead.com/forever/spell=1263067/iron-oven),
+        -- not an item page — it may be granted/placed via a spell or recipe rather
+        -- than an inventory item. The item tooltip hook can't match on a spell ID,
+        -- so this stays pending until an actual item ID (if one exists) is found.
+        spellID = 1263067,
     },
 }
