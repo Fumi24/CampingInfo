@@ -1,5 +1,8 @@
 package-as: CampingInfo
 
+move-folders:
+    CampingInfo: CampingInfo
+
 ignore:
     - Untitled.png
 
