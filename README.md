@@ -39,4 +39,4 @@ README.md
 
 Built against the WoW: Forever client. Not tested on retail or other private servers.
 
-Primary research reference / credits: https://www.wowhead.com/forever/guide/camping-overview-unlock-rewards
+Primary research reference / credits: https://www.wowhead.com/forever/guide/camping-overview-unlock-rewards 
