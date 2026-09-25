@@ -4,7 +4,7 @@ A small World of Warcraft: Forever addon that adds a clear **Camping Benefit** s
 
 ## Install
 
-1. Copy (or clone) the `CampingInfo/` folder into your WoW: Forever `Interface/AddOns/` directory, so the path reads `Interface/AddOns/CampingInfo/CampingInfo.toc`.
+1. Copy (or clone) this repository into your WoW: Forever `Interface/AddOns/` directory as `CampingInfo`, so the path reads `Interface/AddOns/CampingInfo/CampingInfo.toc`.
 2. Restart WoW or `/reload`.
 3. Enable **CampingInfo** in the AddOns list if it isn't already.
 
@@ -28,10 +28,9 @@ Higher tiers can show both inherited buffs and their additional utility.
 ## Project layout
 
 ```text
-CampingInfo/
-  CampingInfo.toc
-  Data.lua
-  Core.lua
+CampingInfo.toc
+Data.lua
+Core.lua
 README.md
 ```
 
