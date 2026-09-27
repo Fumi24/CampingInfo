@@ -56,6 +56,25 @@ local function TooltipHasCampingBenefit(tooltip)
     return false
 end
 
+-- A tooltip for another unit's buff (e.g. hovering someone else's "Camping
+-- Benefit" aura on their unit frame) is still tied to that unit via
+-- GameTooltip:GetUnit(), even though the tooltip line itself never says so.
+-- Using UnitLevel("player") unconditionally there would silently show your
+-- own level's value for someone else's buff.
+local function GetLevelForTooltip(tooltip)
+    if tooltip and tooltip.GetUnit then
+        local _, unit = tooltip:GetUnit()
+        if unit and UnitExists(unit) then
+            local level = UnitLevel(unit)
+            if level and level > 0 then
+                return level
+            end
+            return nil -- unit's level is unknown (e.g. far above yours); don't guess
+        end
+    end
+    return UnitLevel("player")
+end
+
 -- entry.buffValues is either a flat array of magnitudes (level thresholds
 -- unknown) or an array of {level, value} brackets. Only the latter lets us
 -- pick the value that applies at a given character level.
@@ -85,8 +104,8 @@ local function AddCampingLines(tooltip, itemID)
 
     if entry.buff then
         local buffText = entry.buff
-        local level = UnitLevel("player")
-        local value = GetBuffValueForLevel(entry.buffValues, level)
+        local level = GetLevelForTooltip(tooltip)
+        local value = level and GetBuffValueForLevel(entry.buffValues, level)
         if value then
             buffText = string.format("%s (+%d at level %d)", entry.buff, value, level)
         end
