@@ -18,6 +18,14 @@ table Core.lua looks up at tooltip time:
         aliases       = nil,      -- optional list of alternate names shown by
                                    -- the placed world object's tooltip, when
                                    -- it differs from `name`
+        buffValues    = nil,      -- optional buff magnitude by level bracket.
+                                   -- Either a flat array {14, 19, 27, 32} when
+                                   -- only the magnitudes are confirmed (level
+                                   -- thresholds unknown), or an array of
+                                   -- {level = X, value = Y} when the level a
+                                   -- bracket starts at is confirmed too, e.g.
+                                   -- {level = 1, value = 14} applies from
+                                   -- level 1 until the next entry's level.
     }
 
 Item IDs below were sourced from each item's own Wowhead Forever page
@@ -44,6 +52,12 @@ ns.CampingItems = {
     [279956] = { -- Mana Well
         name = "Mana Well", profession = "Alchemy", tier = 1,
         buff = "Mana regeneration", exclusiveWith = "Blessing of Wisdom",
+        buffValues = {10, 15, 20, 24, 29}, -- Mana per 5 sec, per level bracket
+        notes = "5 brackets here (the raw digit string can't fit fewer), but Blessing " ..
+            "of Wisdom only has 4 ranks (levels 1/24/38/54, granting 10/15/20/30). The " ..
+            "first 3 values (10, 15, 20) match those ranks' levels, but this server's " ..
+            "own rank 4 value (24, not 30) starts at an unconfirmed level, and there's " ..
+            "a 5th tier (29) with no known threshold at all -- needs in-game testing.",
         verified = true,
     },
     [279970] = { -- Fermenter
@@ -61,6 +75,12 @@ ns.CampingItems = {
     [279944] = { -- Sharpening Wheel
         name = "Sharpening Wheel", profession = "Blacksmithing", tier = 1,
         buff = "Increased Strength", exclusiveWith = "Strength of Earth Totem",
+        buffValues = { -- Strength; mirrors Strength of Earth's own rank breakpoints
+            {level = 1, value = 6},   -- Strength of Earth Rank 1
+            {level = 24, value = 11}, -- Strength of Earth Rank 2
+            {level = 38, value = 20}, -- Strength of Earth Rank 3
+            {level = 54, value = 34}, -- Strength of Earth Rank 4
+        },
         verified = true,
     },
     [279988] = { -- Anvil
@@ -78,7 +98,24 @@ ns.CampingItems = {
     [279976] = { -- Enchanted Lute
         name = "Enchanted Lute", profession = "Enchanting", tier = 1,
         buff = "Increased Armor, All Stats, and Resistances", exclusiveWith = "Mark of the Wild",
-        notes = "Exact live wording unverified; source text is ambiguous.",
+        buffValues = {
+            -- Only the Armor component could be decoded (rank count matches Mark of
+            -- the Wild's 7 ranks; magnitudes are this server's own, not vanilla's).
+            -- The All Stats and Resistances components are still unresolved -- their
+            -- raw tooltip text is broken (unresolved template placeholders like
+            -- "[][and][,]"), so this remains an incomplete/unverified benefit overall.
+            armor = {
+                {level = 1, value = 28},   -- Mark of the Wild Rank 1
+                {level = 10, value = 71},  -- Mark of the Wild Rank 2
+                {level = 20, value = 114}, -- Mark of the Wild Rank 3
+                {level = 30, value = 163}, -- Mark of the Wild Rank 4
+                {level = 40, value = 211}, -- Mark of the Wild Rank 5
+                {level = 50, value = 260}, -- Mark of the Wild Rank 6
+                {level = 60, value = 308}, -- Mark of the Wild Rank 7
+            },
+        },
+        notes = "Exact live wording unverified; source text is ambiguous. All Stats and " ..
+            "Resistances magnitudes are still unknown -- only Armor has been decoded.",
         verified = false,
     },
     [279985] = { -- Arcane Salvager
@@ -113,6 +150,13 @@ ns.CampingItems = {
     [279962] = { -- Incense Candle
         name = "Incense Candle", profession = "Herbalism", tier = 1,
         buff = "Increased Intellect", exclusiveWith = "Arcane Intellect",
+        buffValues = { -- Intellect; mirrors Arcane Intellect's own rank breakpoints
+            {level = 1, value = 2},   -- Arcane Intellect Rank 1
+            {level = 14, value = 6},  -- Arcane Intellect Rank 2
+            {level = 28, value = 12}, -- Arcane Intellect Rank 3
+            {level = 42, value = 18}, -- Arcane Intellect Rank 4
+            {level = 56, value = 25}, -- Arcane Intellect Rank 5
+        },
         verified = true,
     },
     [279964] = { -- Greenhouse
@@ -148,6 +192,17 @@ ns.CampingItems = {
     [279960] = { -- Lodestone
         name = "Lodestone", profession = "Mining", tier = 1,
         buff = "Increased melee Attack Power", exclusiveWith = "Blessing of Might",
+        buffValues = { -- melee Attack Power; rank count matches Blessing of Might but
+            -- magnitudes were rebalanced for this server (decoded from its own
+            -- tooltip, not the vanilla spell's values). Level thresholds borrowed
+            -- from Blessing of Might's own ranks since the tier count matches.
+            {level = 1, value = 12},
+            {level = 12, value = 20},
+            {level = 24, value = 32},
+            {level = 36, value = 49},
+            {level = 48, value = 67},
+            {level = 60, value = 90},
+        },
         verified = true,
     },
     [279948] = { -- Rock Garden
@@ -181,9 +236,29 @@ ns.CampingItems = {
     },
 
     -- Tailoring
-    [279972] = { -- Faction Banner
+    [279972] = { -- Faction Banner (Horde)
         name = "Faction Banner", profession = "Tailoring", tier = 1,
         buff = "Increased Spirit", exclusiveWith = "Divine Spirit",
+        notes = "This item is Horde-only; the Alliance version is a separate item, 279973.",
+        buffValues = { -- Spirit; mirrors Divine Spirit's own rank breakpoints
+            {level = 1, value = 14},  -- Divine Spirit Rank 1
+            {level = 30, value = 19}, -- Divine Spirit Rank 2
+            {level = 50, value = 27}, -- Divine Spirit Rank 3
+            {level = 60, value = 32}, -- Divine Spirit Rank 4
+        },
+        verified = true,
+    },
+    [279973] = { -- Faction Banner (Alliance)
+        name = "Faction Banner", profession = "Tailoring", tier = 1,
+        buff = "Increased Spirit", exclusiveWith = "Divine Spirit",
+        notes = "This item is Alliance-only; same name and identical Spirit values as " ..
+            "the Horde version, 279972, just different item IDs per faction.",
+        buffValues = { -- Spirit; mirrors Divine Spirit's own rank breakpoints
+            {level = 1, value = 14},  -- Divine Spirit Rank 1
+            {level = 30, value = 19}, -- Divine Spirit Rank 2
+            {level = 50, value = 27}, -- Divine Spirit Rank 3
+            {level = 60, value = 32}, -- Divine Spirit Rank 4
+        },
         verified = true,
     },
     [279943] = { -- Spinning Wheel
@@ -228,6 +303,14 @@ ns.CampingItems = {
     [279968] = { -- First Aid Kit
         name = "First Aid Kit", profession = "First Aid", tier = 1,
         buff = "Stamina buff",
+        buffValues = { -- Stamina; mirrors Power Word: Fortitude's own rank breakpoints
+            {level = 1, value = 3},   -- Power Word: Fortitude Rank 1
+            {level = 12, value = 8},  -- Power Word: Fortitude Rank 2
+            {level = 24, value = 21}, -- Power Word: Fortitude Rank 3
+            {level = 36, value = 34}, -- Power Word: Fortitude Rank 4
+            {level = 48, value = 45}, -- Power Word: Fortitude Rank 5
+            {level = 60, value = 56}, -- Power Word: Fortitude Rank 6
+        },
         verified = true,
     },
     [279940] = { -- Toxin Study

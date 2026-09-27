@@ -56,6 +56,20 @@ local function TooltipHasCampingBenefit(tooltip)
     return false
 end
 
+-- entry.buffValues is either a flat array of magnitudes (level thresholds
+-- unknown) or an array of {level, value} brackets. Only the latter lets us
+-- pick the value that applies at a given character level.
+local function GetBuffValueForLevel(buffValues, level)
+    local best = nil
+    for _, bracket in ipairs(buffValues or {}) do
+        if type(bracket) == "table" and bracket.level and bracket.value
+            and bracket.level <= level and (not best or bracket.level > best.level) then
+            best = bracket
+        end
+    end
+    return best and best.value
+end
+
 local function AddCampingLines(tooltip, itemID)
     local entry = ns.CampingItems[itemID]
     if not entry then
@@ -70,7 +84,13 @@ local function AddCampingLines(tooltip, itemID)
     tooltip:AddLine("Camping Benefit", 1.0, 0.82, 0.0)
 
     if entry.buff then
-        tooltip:AddLine(entry.buff, 0.3, 1.0, 0.3, true)
+        local buffText = entry.buff
+        local level = UnitLevel("player")
+        local value = GetBuffValueForLevel(entry.buffValues, level)
+        if value then
+            buffText = string.format("%s (+%d at level %d)", entry.buff, value, level)
+        end
+        tooltip:AddLine(buffText, 0.3, 1.0, 0.3, true)
     end
 
     if entry.utility then
