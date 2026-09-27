@@ -131,6 +131,24 @@ local function GetTooltipFirstLineText(tooltip)
     return fontString:GetText()
 end
 
+-- Some tooltip text (e.g. on certain NPCs/objects) can be a Blizzard
+-- "secret" string that addons are not allowed to read: even calling
+-- :lower() or comparing it with == throws "while execution tainted by
+-- <addon>". pcall lets us detect that and just skip the tooltip instead
+-- of erroring.
+local function SafeLowerText(text)
+    local ok, result = pcall(string.lower, text)
+    if ok then
+        return result
+    end
+    return nil
+end
+
+local function SafeTextEquals(a, b)
+    local ok, result = pcall(function() return a == b end)
+    return ok and result
+end
+
 local function OnTooltipNameFallback(tooltip)
     if not CampingInfoSettings.enabled then
         return
@@ -143,7 +161,11 @@ local function OnTooltipNameFallback(tooltip)
 
     -- Substring match rather than exact equality: a placed object's tooltip
     -- may add coloring, an owner tag, or other text around the item name.
-    local lowerText = text:lower()
+    local lowerText = SafeLowerText(text)
+    if not lowerText then
+        return
+    end
+
     for id, entry in pairs(ns.CampingItems) do
         if lowerText:find(entry.name:lower(), 1, true) then
             AddCampingLines(tooltip, id)
@@ -174,7 +196,7 @@ local function PollTooltipForNameFallback(tooltip)
         return
     end
 
-    if text == lastPolledText and TooltipHasCampingBenefit(tooltip) then
+    if SafeTextEquals(text, lastPolledText) and TooltipHasCampingBenefit(tooltip) then
         return
     end
 
